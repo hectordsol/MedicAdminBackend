@@ -1,5 +1,5 @@
 import psycopg2
-#Clase que maneja CRUD de la tabla de usuarios en la base de datos PostgreSQL en ElephantSQL
+#Clase que maneja CRUD de la tabla de Appointments en la base de datos PostgreSQL en ElephantSQL
 class AppointmentConnection():
     conn = None
 
@@ -13,7 +13,7 @@ class AppointmentConnection():
     def read_all(self):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                        SELECT * FROM users; 
+                        SELECT * FROM medical_appointment; 
                         """)
             data =cur.fetchall()
             return data
@@ -21,7 +21,7 @@ class AppointmentConnection():
     def read_one(self, id):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                            SELECT * FROM users WHERE id = %s; 
+                            SELECT * FROM medical_appointment WHERE id = %s; 
                             """, (id,))
             data = cur.fetchone()
             return data
@@ -29,28 +29,26 @@ class AppointmentConnection():
     def write(self, data):
         with self.conn.cursor() as cur:
             cur.execute("""
-                        INSERT INTO "users"(id, first_name, last_name, email, address, city, country, 
-                        phone, date_of_birth, gender, password, specialty, health_insurance, user_type) 
-                        VALUES(uuid_generate_v4(), %(first_name)s, %(last_name)s, %(email)s, %(address)s,
-                        %(city)s, %(country)s, %(phone)s, %(date_of_birth)s, %(gender)s, %(password)s,
-                        %(specialty)s, %(health_insurance)s, %(user_type)s)
+                        INSERT INTO "medical_appointment"(id, start_datetime, end_datetime, diagnosis,
+                        prescription, id_patient, id_doctor, state) 
+                        VALUES(uuid_generate_v4(), %(start_datetime)s, %(end_datetime)s, %(diagnosis)s,
+                        %(prescription)s, %(id_patient)s, %(id_doctor)s, %(state)s)
                         """,data)
             self.conn.commit()
 
     def delete_one(self, id):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                            DELETE FROM "users" WHERE id = %s; 
+                            DELETE FROM "medical_appointment" WHERE id = %s; 
                             """, (id,))
             self.conn.commit()
     
     def update_one(self, data):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                        UPDATE "users" SET first_name = %(first_name)s, last_name = %(last_name)s, email = %(email)s,
-                        address = %(address)s, city = %(city)s, country = %(country)s, phone = %(phone)s, date_of_birth = %(date_of_birth)s, 
-                        gender = %(gender)s, password = %(password)s, specialty = %(specialty)s, health_insurance = %(health_insurance)s,
-                        user_type = %(user_type)s,
+                        UPDATE "medical_appointment" SET start_datetime = %(start_datetime)s, end_datetime = %(end_datetime)s, 
+                        diagnosis = %(diagnosis)s, prescription = %(prescription)s, id_patient = %(id_patient)s, 
+                        id_doctor = %(id_doctor)s, state = %(state)s
                         WHERE id = %(id)s; 
                         """, data)
             self.conn.commit()
