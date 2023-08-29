@@ -7,7 +7,7 @@ from app.schemas.appointment_schema import AppointmentSchema
 router = APIRouter()
 conn = AppointmentConnection()
 
-@router.get('/appointments', status_code=HTTP_200_OK,tags=["Appointments"])
+@router.get('/', status_code=HTTP_200_OK,tags=["Appointments"])
 async def get_users():
      items=[]
      for data in conn.read_all():
@@ -23,7 +23,7 @@ async def get_users():
           items.append(dictionary)
      return items
 
-@router.post("/appointments/", status_code=HTTP_201_CREATED,tags=["Appointments"])
+@router.post("/", status_code=HTTP_201_CREATED,tags=["Appointments"])
 async def create_user(appointment: AppointmentSchema):
     data=appointment.dict()
     print(appointment)
@@ -31,7 +31,7 @@ async def create_user(appointment: AppointmentSchema):
     return Response(status_code=HTTP_201_CREATED)
 
 
-@router.get("/appointments/{id}", status_code=HTTP_200_OK,tags=["Appointments"])
+@router.get("/{id}", status_code=HTTP_200_OK,tags=["Appointments"])
 async def get_one(id: str):
      dictionary = {}
      data = conn.read_one(id)
@@ -45,14 +45,14 @@ async def get_one(id: str):
      dictionary["state"] = data[7]
      return data
 
-@router.put("/appointments/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
+@router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
 async def update_one(appointment: AppointmentSchema, id:str):
     data=appointment.dict()
     data["id"] = id
     conn.update_one(data)
     return Response(status_code=HTTP_204_NO_CONTENT)
 
-@router.delete("/appointments/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
+@router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
 async def delete_one(id: str):
      conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
