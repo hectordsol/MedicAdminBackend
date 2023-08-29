@@ -1,28 +1,12 @@
-from fastapi import FastAPI, Response
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from models.user_connection import UserConnection
-from schema.user_schema import UserSchema
+from app.models.user_connection import UserConnection
+from app.schemas.user_schema import UserSchema
 
-app = FastAPI()
-app.title = "Medic Admin App"
-app.version ="0.1.0"
+router = APIRouter()
 conn = UserConnection()
 
-app.add_middleware(
-          CORSMiddleware,
-          allow_origins=["*"],
-          allow_methods=["GET","POST","PUT","DELETE"],
-          allow_headers=["Authorization","Content-Type"],
-          allow_credentials=True
-)
-
-@app.get('/', status_code=HTTP_200_OK,tags=["Root"])
-async def root():
-     return {'Root API AppMedicAdmin'}
-
-
-@app.get('/users', status_code=HTTP_200_OK,tags=["Users"])
+@router.get('/users', status_code=HTTP_200_OK,tags=["Users"])
 async def get_users():
      items=[]
      for data in conn.read_all():
@@ -44,7 +28,7 @@ async def get_users():
           items.append(dictionary)
      return items
 
-@app.post("/users/", status_code=HTTP_201_CREATED,tags=["Users"])
+@router.post("/users/", status_code=HTTP_201_CREATED,tags=["Users"])
 async def create_user(user: UserSchema):
     data=user.dict()
     print(data)
@@ -52,7 +36,7 @@ async def create_user(user: UserSchema):
     return Response(status_code=HTTP_201_CREATED)
 
 
-@app.get("/users/{id}", status_code=HTTP_200_OK,tags=["Users"])
+@router.get("/users/{id}", status_code=HTTP_200_OK,tags=["Users"])
 async def get_one(id: str):
      dictionary = {}
      data = conn.read_one(id)
@@ -72,14 +56,14 @@ async def get_one(id: str):
      dictionary["user_type"] = data[13]
      return data
 
-@app.put("/users/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Users"])
+@router.put("/users/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Users"])
 async def update_one(user: UserSchema, id:str):
     data=user.dict()
     data["id"] = id
     conn.update_one(data)
     return Response(status_code=HTTP_204_NO_CONTENT)
 
-@app.delete("/users/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Users"])
+@router.delete("/users/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Users"])
 async def delete_one(id: str):
      conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
