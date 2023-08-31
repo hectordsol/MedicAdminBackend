@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import user_routes, appointment_routes
+from app.routes import admin_routes, doctor_routes, patient_routes, appointment_routes
 from starlette.status import HTTP_200_OK
 
 app = FastAPI()
@@ -19,5 +19,8 @@ app.add_middleware(
 async def root():
      return {'Root API AppMedicAdmin'}
 
-app.include_router(user_routes.router, prefix="/users", tags=["Users"])
+
+app.include_router(admin_routes.router, prefix="/admin", tags=["Admin"])
+app.include_router(doctor_routes.router, prefix="/doctors", tags=["Doctors"])
+app.include_router(patient_routes.router, prefix="/patients", tags=["Patients"])
 app.include_router(appointment_routes.router, prefix="/appointments", tags=["Appointments"])

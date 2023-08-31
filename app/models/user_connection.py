@@ -10,11 +10,11 @@ class UserConnection():
             print(err)
             self.conn.close()
 
-    def read_all(self):
+    def read_all(self,type):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                        SELECT * FROM users; 
-                        """)
+                        SELECT * FROM users WHERE user_type = %s; 
+                        """,(type,))
             data =cur.fetchall()
             return data
 

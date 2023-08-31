@@ -12,10 +12,15 @@ class UserSchema(BaseModel):
     city:Optional[str]
     country:Optional[str]
     phone:Optional[str]
-    password: Optional[str]
     date_of_birth: date
     gender: str
+    # user_type: str
+
+class AdminSchema(UserSchema):
+    password: str
+
+class DoctorSchema(AdminSchema):
     specialty: str
+
+class PatientSchema(UserSchema):
     health_insurance: str
-    password: Optional[str]
-    user_type: str
