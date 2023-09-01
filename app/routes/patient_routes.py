@@ -1,13 +1,16 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from app.models.user_connection import UserConnection
 from app.schemas.user_schema import PatientSchema
+
+auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 router = APIRouter()
 conn = UserConnection()
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Patients"])
-async def get_patients():
+async def get_patients(token: str = Depends(auth_scheme)):
      items=[]
      for data in conn.read_all("patient"):
           dictionary = {}

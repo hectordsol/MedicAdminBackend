@@ -2,6 +2,8 @@ from fastapi import APIRouter, Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from app.models.user_connection import UserConnection
 from app.schemas.user_schema import DoctorSchema
+from passlib.context import CryptContext
+import bcrypt
 
 router = APIRouter()
 conn = UserConnection()
@@ -32,6 +34,9 @@ async def create_doctor(user: DoctorSchema):
     data=user.dict()
     data["user_type"] = "doctor"
     data["health_insurance"] = ""
+    # Hash de la contraseña antes de guardarla
+    hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
+    data["password"] = hashed_password.decode('utf-8')
     print(data)
     conn.write(data)
     return Response(status_code=HTTP_201_CREATED)
