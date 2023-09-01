@@ -13,7 +13,7 @@ class AppointmentConnection():
     def read_all(self):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                        SELECT * FROM medical_appointment; 
+                        SELECT * FROM medical_appointment;
                         """)
             data =cur.fetchall()
             return data
@@ -30,7 +30,7 @@ class AppointmentConnection():
         with self.conn.cursor() as cur:
             cur.execute("""
                         INSERT INTO "medical_appointment"(id, start_datetime, end_datetime, diagnosis,
-                        prescription, id_patient, id_doctor, state) 
+                        prescription, id_patient, id_doctor, state)
                         VALUES(uuid_generate_v4(), %(start_datetime)s, %(end_datetime)s, %(diagnosis)s,
                         %(prescription)s, %(id_patient)s, %(id_doctor)s, %(state)s)
                         """,data)
@@ -38,14 +38,14 @@ class AppointmentConnection():
 
     def delete_one(self, id):
         with self.conn.cursor() as cur:
-            cur.execute(""" 
-                            DELETE FROM "medical_appointment" WHERE id = %s; 
-                            """, (id,))
+            cur.execute("""
+                        DELETE FROM "medical_appointment" WHERE id = %s;
+                        """, (id,))
             self.conn.commit()
     
     def update_one(self, data):
         with self.conn.cursor() as cur:
-            cur.execute(""" 
+            cur.execute("""
                         UPDATE "medical_appointment" SET start_datetime = %(start_datetime)s, end_datetime = %(end_datetime)s, 
                         diagnosis = %(diagnosis)s, prescription = %(prescription)s, id_patient = %(id_patient)s, 
                         id_doctor = %(id_doctor)s, state = %(state)s
@@ -53,5 +53,26 @@ class AppointmentConnection():
                         """, data)
             self.conn.commit()
 
+    def read_calendar(self,id, init, end):
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                        SELECT ma.id AS appointment_id,
+                        ma.start_datetime,
+                        ma.end_datetime,
+                        ma.state,
+                        p.first_name AS patient_first_name,
+                        p.last_name AS patient_last_name
+                        FROM medical_appointment ma
+                        JOIN users p ON ma.id_patient = p.id
+                        WHERE ma.id_doctor = %s
+                        AND ma.start_datetime >= %s
+                        AND ma.start_datetime <= %s
+                        """, (id, init, end,))
+            data =cur.fetchall()
+            print(data)
+            return data
+
+
     def __def__(self):
         self.conn.close()
+        

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-
+from datetime import date
 from app.models.appointment_connection import AppointmentConnection
 from app.schemas.appointment_schema import AppointmentSchema
 
@@ -8,7 +8,7 @@ router = APIRouter()
 conn = AppointmentConnection()
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Appointments"])
-async def get_users():
+async def get_appointments():
      items=[]
      for data in conn.read_all():
           dictionary = {}
@@ -24,15 +24,15 @@ async def get_users():
      return items
 
 @router.post("/", status_code=HTTP_201_CREATED,tags=["Appointments"])
-async def create_user(appointment: AppointmentSchema):
+async def create_appointment(appointment: AppointmentSchema):
     data=appointment.dict()
-    print(appointment)
-    conn.write(appointment)
+    print(data)
+    conn.write(data)
     return Response(status_code=HTTP_201_CREATED)
 
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Appointments"])
-async def get_one(id: str):
+async def get_one_appointment(id: str):
      dictionary = {}
      data = conn.read_one(id)
      dictionary["id"] = data[0]
@@ -46,13 +46,18 @@ async def get_one(id: str):
      return data
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
-async def update_one(appointment: AppointmentSchema, id:str):
+async def update_one_appointment(appointment: AppointmentSchema, id:str):
     data=appointment.dict()
     data["id"] = id
     conn.update_one(data)
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
-async def delete_one(id: str):
+async def delete_one_appointment(id: str):
      conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
+
+@router.get("/calendar/{id}", status_code=HTTP_200_OK,tags=["Medical Appointments Calendar"])
+async def get_calendar(id: str, init: str, end: str):
+     data = conn.read_calendar(id, init, end)
+     return data
