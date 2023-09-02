@@ -2,7 +2,6 @@ from fastapi import APIRouter, Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from app.models.user_connection import UserConnection
 from app.schemas.user_schema import DoctorSchema
-# from passlib.context import CryptContext
 import bcrypt
 
 router = APIRouter()
