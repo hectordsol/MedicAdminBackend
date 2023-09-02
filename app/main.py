@@ -43,33 +43,34 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
    
 def auth_user(email, password):
      user = get_by_email_user(email)
-     print(user)
+     print(user[10])
      if not user:
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate user", 
                 headers={"WWW-Authenticate":"Bearer"}) 
-     if not verify_pass(password):
+     if not verify_pass(password,user[10]):
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate pass", 
                 headers={"WWW-Authenticate":"Bearer"}) 
      return user
 
 def verify_pass(plane_password, hash_password):
+     print(plane_password, hash_password)
      return pwd_context.verify(plane_password, hash_password)
 
 def get_by_email_user(email: str):
      print(email)
-     dictionary = {}
+     # dictionary = {}
      data = conn.read_by_email(email)
-     dictionary["id"] = data[0]
-     dictionary["first_name"] = data[1]
-     dictionary["last_name"] = data[2]
-     dictionary["email"] = data[3]
-     dictionary["address"] = data[4]
-     dictionary["city"] = data[5]
-     dictionary["country"] = data[6]
-     dictionary["phone"] = data[7]
-     dictionary["date_of_birth"] = data[8]
-     dictionary["gender"] = data[9]
-     dictionary["password"] = data[10]
-     dictionary["specialty"] = data[11]
-     dictionary["user_type"] = data[13]
+     # dictionary["id"] = data[0]
+     # dictionary["first_name"] = data[1]
+     # dictionary["last_name"] = data[2]
+     # dictionary["email"] = data[3]
+     # dictionary["address"] = data[4]
+     # dictionary["city"] = data[5]
+     # dictionary["country"] = data[6]
+     # dictionary["phone"] = data[7]
+     # dictionary["date_of_birth"] = data[8]
+     # dictionary["gender"] = data[9]
+     # dictionary["password"] = data[10]
+     # dictionary["specialty"] = data[11]
+     # dictionary["user_type"] = data[13]
      return data
