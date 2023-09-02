@@ -66,3 +66,4 @@ async def update_one_admin(user: AdminSchema, id:str):
 async def delete_one_admin(id: str):
      conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
+

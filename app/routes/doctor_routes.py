@@ -71,23 +71,3 @@ async def update_one_doctor(user: DoctorSchema, id:str):
 async def delete_one_doctor(id: str):
      conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
-
-
-@router.get("/usermail", status_code=HTTP_200_OK,tags=["Doctors"])
-async def get_by_email_doctor(email: str):
-     dictionary = {}
-     data = conn.read_by_email(email)
-     dictionary["id"] = data[0]
-     dictionary["first_name"] = data[1]
-     dictionary["last_name"] = data[2]
-     dictionary["email"] = data[3]
-     dictionary["address"] = data[4]
-     dictionary["city"] = data[5]
-     dictionary["country"] = data[6]
-     dictionary["phone"] = data[7]
-     dictionary["date_of_birth"] = data[8]
-     dictionary["gender"] = data[9]
-     dictionary["password"] = data[10]
-     dictionary["specialty"] = data[11]
-     dictionary["user_type"] = data[13]
-     return data
