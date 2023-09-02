@@ -1,0 +1,10 @@
+version: '3'
+services:
+  backend:
+    image: appmedicine
+    build: .
+    container_name: fastapi-medicine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/FASTAPIBACK
