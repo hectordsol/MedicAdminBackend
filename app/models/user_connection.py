@@ -26,6 +26,14 @@ class UserConnection():
             data = cur.fetchone()
             return data
 
+    def read_by_email(self, mail):
+        with self.conn.cursor() as cur:
+            cur.execute(""" 
+                            SELECT * FROM users WHERE email = %s LIMIT 1; 
+                            """, (mail,))
+            data = cur.fetchone()
+            return data
+
     def write(self, data):
         with self.conn.cursor() as cur:
             cur.execute("""
