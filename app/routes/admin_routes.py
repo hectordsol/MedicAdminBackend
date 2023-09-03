@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from app.models.database_connection import DatabaseConnection
 from app.models.user_connection import UserConnection
 from app.schemas.user_schema import AdminSchema
 
 router = APIRouter()
-conn = UserConnection()
+conn = DatabaseConnection()
+user_conn = UserConnection(conn.get_connection())
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Admin"])
 async def get_admins():
      items=[]
-     for data in conn.read_all("admin"):
+     for data in user_conn.read_all("admin"):
           dictionary = {}
           dictionary["id"] = data[0]
           dictionary["first_name"] = data[1]
@@ -33,14 +35,14 @@ async def create_admin(user: AdminSchema):
     data["health_insurance"] = ""
     data["specialty"] = ""
     print(data)
-    conn.write(data)
+    user_conn.write(data)
     return Response(status_code=HTTP_201_CREATED)
 
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Admin"])
 async def get_one_admin(id: str):
      dictionary = {}
-     data = conn.read_one(id)
+     data = user_conn.read_one(id)
      dictionary["id"] = data[0]
      dictionary["first_name"] = data[1]
      dictionary["last_name"] = data[2]
@@ -59,11 +61,11 @@ async def get_one_admin(id: str):
 async def update_one_admin(user: AdminSchema, id:str):
     data=user.dict()
     data["id"] = id
-    conn.update_one(data)
+    user_conn.update_one(data)
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Admin"])
 async def delete_one_admin(id: str):
-     conn.delete_one(id)
+     user_conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
 

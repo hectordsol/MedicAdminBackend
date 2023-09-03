@@ -1,14 +1,16 @@
-import psycopg2
-#Clase que maneja CRUD de la tabla de usuarios en la base de datos PostgreSQL en ElephantSQL
-class UserConnection():
-    conn = None
+from app.models.database_connection import DatabaseConnection
+# import psycopg2
+# Clase que maneja CRUD de la tabla de usuarios en la base de datos PostgreSQL en ElephantSQL
+class UserConnection(DatabaseConnection):
+    def __init__(self, db_connection):
+        self.conn = db_connection
 
-    def __init__(self):
-        try:
-            self.conn = psycopg2.connect("dbname=fdpkijde user=fdpkijde password=BSaXT5TQ8uOvLYRRTQnCCqrH8c8-bDzQ host=rosie.db.elephantsql.com")
-        except psycopg2.OperationalError as err:
-            print(err)
-            self.conn.close()
+    # def __init__(self):
+    #     try:
+    #         self.conn = psycopg2.connect("dbname=fdpkijde user=fdpkijde password=BSaXT5TQ8uOvLYRRTQnCCqrH8c8-bDzQ host=rosie.db.elephantsql.com")
+    #     except psycopg2.OperationalError as err:
+    #         print(err)
+    #         self.conn.close()
 
     def read_all(self,type):
         with self.conn.cursor() as cur:
@@ -53,12 +55,13 @@ class UserConnection():
             self.conn.commit()
     
     def update_one(self, data):
+        print(data)
         with self.conn.cursor() as cur:
             cur.execute(""" 
                         UPDATE "users" SET first_name = %(first_name)s, last_name = %(last_name)s, email = %(email)s,
                         address = %(address)s, city = %(city)s, country = %(country)s, phone = %(phone)s, date_of_birth = %(date_of_birth)s, 
                         gender = %(gender)s, password = %(password)s, specialty = %(specialty)s, health_insurance = %(health_insurance)s,
-                        user_type = %(user_type)s,
+                        user_type = %(user_type)s
                         WHERE id = %(id)s; 
                         """, data)
             self.conn.commit()

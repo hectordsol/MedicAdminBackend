@@ -3,12 +3,16 @@ from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.routes import admin_routes, doctor_routes, patient_routes, appointment_routes
+from app.models.database_connection import DatabaseConnection
 from app.models.user_connection import UserConnection
-from jose import AdminSchema
+from jose import jwt, JWTError
+from typing import Union
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-conn = UserConnection()
-
+ALGORITHM = "HS256"
+SECRET_KEY = "e97965045c7df14cb4d5760371e7325104a8f33ad5d00c0a506d6fb09d0047db"
+db_connection = DatabaseConnection()
+user_conn = UserConnection(db_connection.get_connection())
 app = FastAPI()
 auth_scheme = OAuth2PasswordBearer("/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -37,15 +41,16 @@ app.include_router(appointment_routes.router, prefix="/appointments", tags=["App
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
      user = auth_user(form_data.username, form_data.password)
      access_token_expires = timedelta(hours=2)
-     access_token_jwt = create_token({"sub":user[3]})
-     return {"access_token":"que paso","token_type":"bearer"}
+     access_token_jwt = create_token({"id":user[0],"sub": user[1]+" "+user[2]}, access_token_expires)
+     return {"access_token":access_token_jwt,"token_type":"bearer"}
+
 # funcion de autenticación que llama a verificar si existe usuario y si la contraseña es correcta
 def auth_user(email, password):
      user = get_by_email_user(email)
-     hashedPassword=user[10]
      if not user:
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate user", 
                 headers={"WWW-Authenticate":"Bearer"}) 
+     hashedPassword=user[10]
      if not verify_pass(password,hashedPassword):
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate pass", 
                 headers={"WWW-Authenticate":"Bearer"}) 
@@ -57,6 +62,16 @@ def verify_pass(plane_password, hash_password):
 
 #Verifica que el email corresponde a un usuario cargado en la base de datos
 def get_by_email_user(email: str):
-     print(email)
-     data = conn.read_by_email(email)
+     # print(email)
+     data = user_conn.read_by_email(email)
      return data
+
+def create_token(data: dict, time_expires: Union[datetime,None] = None):
+     data_copy = data.copy()
+     if time_expires is None:
+          expires = datetime.utcnow() + timedelta(hours=1)
+     else:
+          expires = datetime.utcnow() + time_expires
+     data_copy.update({"exp":expires})
+     token_jwt = jwt.encode(data_copy, key=SECRET_KEY, algorithm=ALGORITHM)
+     return token_jwt

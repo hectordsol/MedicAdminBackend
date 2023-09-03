@@ -1,16 +1,23 @@
 from fastapi import APIRouter, Response
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from app.models.database_connection import DatabaseConnection
+# from app.models.appointment_connection import AppointmentConnection
 from app.models.user_connection import UserConnection
+
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from app.schemas.user_schema import DoctorSchema
 import bcrypt
 
 router = APIRouter()
-conn = UserConnection()
+
+db_connection = DatabaseConnection()
+
+user_conn = UserConnection(db_connection.get_connection())
+# apmt_conn = AppointmentConnection(db_connection.get_connection())
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Doctors"])
 async def get_doctors():
      items=[]
-     for data in conn.read_all("doctor"):
+     for data in user_conn.read_all("doctor"):
           dictionary = {}
           dictionary["id"] = data[0]
           dictionary["first_name"] = data[1]
@@ -36,15 +43,14 @@ async def create_doctor(user: DoctorSchema):
     # Hash de la contraseña antes de guardarla
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
     data["password"] = hashed_password.decode('utf-8')
-    print(data)
-    conn.write(data)
+    user_conn.write(data)
     return Response(status_code=HTTP_201_CREATED)
 
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Doctors"])
 async def get_one_doctor(id: str):
      dictionary = {}
-     data = conn.read_one(id)
+     data = user_conn.read_one(id)
      dictionary["id"] = data[0]
      dictionary["first_name"] = data[1]
      dictionary["last_name"] = data[2]
@@ -64,10 +70,16 @@ async def get_one_doctor(id: str):
 async def update_one_doctor(user: DoctorSchema, id:str):
     data=user.dict()
     data["id"] = id
-    conn.update_one(data)
+    data["user_type"] = "doctor"
+    data["health_insurance"] = ""
+    # Hash de la contraseña antes de guardarla
+    hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
+    data["password"] = hashed_password.decode('utf-8')
+    print(data)
+    user_conn.update_one(data)
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Doctors"])
 async def delete_one_doctor(id: str):
-     conn.delete_one(id)
+     user_conn.delete_one(id)
      return Response(status_code=HTTP_204_NO_CONTENT)
