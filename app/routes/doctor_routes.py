@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Response
-from app.models.database_connection import DatabaseConnection
 # from app.models.appointment_connection import AppointmentConnection
 from app.models.user_connection import UserConnection
 
@@ -9,14 +8,14 @@ import bcrypt
 
 router = APIRouter()
 
-db_connection = DatabaseConnection()
+user_conn = UserConnection("doctor_routes_inicio")
+user_conn.close_connection("doctor_routes_inicio")
 
-user_conn = UserConnection(db_connection.get_connection())
-# apmt_conn = AppointmentConnection(db_connection.get_connection())
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Doctors"])
 async def get_doctors():
      items=[]
+     user_conn.__init__()
      for data in user_conn.read_all("doctor"):
           dictionary = {}
           dictionary["id"] = data[0]
@@ -33,6 +32,7 @@ async def get_doctors():
           dictionary["specialty"] = data[11]
           dictionary["user_type"] = data[13]
           items.append(dictionary)
+     user_conn.close_connection()
      return items
 
 @router.post("/", status_code=HTTP_201_CREATED,tags=["Doctors"])
@@ -43,13 +43,16 @@ async def create_doctor(user: DoctorSchema):
     # Hash de la contraseña antes de guardarla
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
     data["password"] = hashed_password.decode('utf-8')
+    user_conn.__init__()
     user_conn.write(data)
+    user_conn.close_connection()
     return Response(status_code=HTTP_201_CREATED)
 
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Doctors"])
 async def get_one_doctor(id: str):
      dictionary = {}
+     user_conn.__init__()
      data = user_conn.read_one(id)
      dictionary["id"] = data[0]
      dictionary["first_name"] = data[1]
@@ -64,6 +67,7 @@ async def get_one_doctor(id: str):
      dictionary["password"] = data[10]
      dictionary["specialty"] = data[11]
      dictionary["user_type"] = data[13]
+     user_conn.close_connection()
      return data
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Doctors"])
@@ -76,10 +80,14 @@ async def update_one_doctor(user: DoctorSchema, id:str):
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
     data["password"] = hashed_password.decode('utf-8')
     print(data)
+    user_conn.__init__()
     user_conn.update_one(data)
+    user_conn.close_connection()
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Doctors"])
 async def delete_one_doctor(id: str):
+     user_conn.__init__()
      user_conn.delete_one(id)
+     user_conn.close_connection()
      return Response(status_code=HTTP_204_NO_CONTENT)

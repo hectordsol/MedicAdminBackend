@@ -9,9 +9,12 @@ from jose import jwt, JWTError
 ALGORITHM = "HS256"
 SECRET_KEY = "e97965045c7df14cb4d5760371e7325104a8f33ad5d00c0a506d6fb09d0047db"
 router = APIRouter()
-db_conn = DatabaseConnection()
-user_conn = UserConnection(db_conn.get_connection())
-apmt_conn = AppointmentConnection(db_conn.get_connection())
+# db_conn = DatabaseConnection("appointment_routes")
+# db_conn.close_connection("appointment_routes")
+user_conn = UserConnection("user_appointment_routes")
+user_conn.close_connection("user_appointment_routes")
+apmt_conn = AppointmentConnection("apmt_appintment_routes")
+apmt_conn.close_connection("apmt_appintment_routes")
 
 auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 # auth_scheme = OAuth2PasswordBearer("/login")
@@ -27,7 +30,9 @@ def get_user_current(token: str = Depends(auth_scheme)):
      except JWTError:
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User not valid ", 
                headers={"WWW-Authenticate":"Bearer"})
+     apmt_conn.__init__()
      user = user_conn.read_one(id_user)
+     apmt_conn.close_connection()
      # print(user)
      if not user:
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User not valid 3", 
@@ -37,6 +42,7 @@ def get_user_current(token: str = Depends(auth_scheme)):
 @router.get('/', status_code=HTTP_200_OK,tags=["Appointments"])
 async def get_appointments():
      items=[]
+     apmt_conn.__init__()
      for data in apmt_conn.read_all():
           dictionary = {}
           dictionary["id"] = data[0]
@@ -48,19 +54,23 @@ async def get_appointments():
           dictionary["id_doctor"] = data[6]
           dictionary["state"] = data[7]
           items.append(dictionary)
+     apmt_conn.close_connection()
      return items
 
 @router.post("/", status_code=HTTP_201_CREATED,tags=["Appointments"])
 async def create_appointment(appointment: AppointmentSchema):
-    data=appointment.dict()
-    print(data)
-    apmt_conn.write(data)
-    return Response(status_code=HTTP_201_CREATED)
+     data=appointment.dict()
+     #print(data)
+     apmt_conn.__init__()
+     apmt_conn.write(data)
+     apmt_conn.close_connection()
+     return Response(status_code=HTTP_201_CREATED)
 
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Appointments"])
 async def get_one_appointment(id: str):
      dictionary = {}
+     apmt_conn.__init__()
      data = apmt_conn.read_one(id)
      dictionary["id"] = data[0]
      dictionary["start_datetime"] = data[1]
@@ -70,25 +80,31 @@ async def get_one_appointment(id: str):
      dictionary["id_patient"] = data[5]
      dictionary["id_doctor"] = data[6]
      dictionary["state"] = data[7]
+     apmt_conn.close_connection()
      return data
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
 async def update_one_appointment(appointment: AppointmentSchema, id:str):
     data=appointment.dict()
     data["id"] = id
+    apmt_conn.__init__()
     apmt_conn.update_one(data)
+    apmt_conn.close_connection()
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.delete("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
 async def delete_one_appointment(id: str):
+     apmt_conn.__init__()
      apmt_conn.delete_one(id)
+     apmt_conn.close_connection()
      return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.get("/calendar/", status_code=HTTP_200_OK,tags=["Medical Appointments Calendar"])
 async def get_calendar(init: str, end: str, token: str = Depends(auth_scheme)):
      id = get_user_current(token)
-     print(id)
+     user_conn.__init__()
      data = apmt_conn.read_calendar(init, end, id)
+     user_conn.close_connection()
      return data
 
  

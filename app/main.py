@@ -5,14 +5,17 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.routes import admin_routes, doctor_routes, patient_routes, appointment_routes
 from app.models.database_connection import DatabaseConnection
 from app.models.user_connection import UserConnection
-from jose import jwt, JWTError
+from jose import jwt
 from typing import Union
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 ALGORITHM = "HS256"
 SECRET_KEY = "e97965045c7df14cb4d5760371e7325104a8f33ad5d00c0a506d6fb09d0047db"
-db_connection = DatabaseConnection()
-user_conn = UserConnection(db_connection.get_connection())
+# db_conn = DatabaseConnection("main")
+user_conn = UserConnection("main_inicio")
+user_conn.close_connection("main_inicio")
+# db_conn.close_connection("main")
+
 app = FastAPI()
 auth_scheme = OAuth2PasswordBearer("/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -30,7 +33,6 @@ app.add_middleware(
 @app.get('/', status_code=HTTP_200_OK,tags=["Root"])
 async def root():
      return {'Root API AppMedicAdmin'}
-
 
 app.include_router(admin_routes.router, prefix="/admin", tags=["Admin"])
 app.include_router(doctor_routes.router, prefix="/doctors", tags=["Doctors"])
@@ -63,7 +65,9 @@ def verify_pass(plane_password, hash_password):
 #Verifica que el email corresponde a un usuario cargado en la base de datos
 def get_by_email_user(email: str):
      # print(email)
+     user_conn.__init__()
      data = user_conn.read_by_email(email)
+     user_conn.close_connection()
      return data
 
 def create_token(data: dict, time_expires: Union[datetime,None] = None):
