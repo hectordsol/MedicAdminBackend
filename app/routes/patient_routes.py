@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Response, Depends, HTTPException
+from fastapi import APIRouter, Response, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from app.models.database_connection import DatabaseConnection
 from app.models.user_connection import UserConnection
 from app.schemas.user_schema import PatientSchema
+from app.schemas.user_schema import blacklisted_tokens
 
 auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -13,8 +14,18 @@ router = APIRouter()
 user_conn = UserConnection("user_routes_inicio")
 user_conn.close_connection("user_routes_inicio")
 
+#Middleware para verificar, tiene que estar antes de la ruta que lo llama
+def verify_token_in_blacklist(token: str = Depends(auth_scheme)):
+    print("verificando", token)
+    if token in blacklisted_tokens:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
 @router.get('/', status_code=HTTP_200_OK,tags=["Patients"])
-async def get_patients(token: str = Depends(auth_scheme)):
+async def get_patients(token: dict = Depends(verify_token_in_blacklist)):
      items=[]
      user_conn.__init__()
      for data in user_conn.read_all("patient"):

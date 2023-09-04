@@ -3,6 +3,8 @@ from typing import Optional
 from datetime import date
 import uuid
 
+blacklisted_tokens = set()
+
 class UserSchema(BaseModel):
     id:Optional[uuid.UUID]
     first_name: str

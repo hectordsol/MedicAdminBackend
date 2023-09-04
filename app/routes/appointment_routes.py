@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Response, Depends,HTTPException
+from fastapi import APIRouter, Response, Depends,HTTPException, status
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
-from app.models.database_connection import DatabaseConnection
+
 from app.models.appointment_connection import AppointmentConnection
 from app.models.user_connection import UserConnection
 from app.schemas.appointment_schema import AppointmentSchema
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from app.schemas.user_schema import blacklisted_tokens
+
+
 ALGORITHM = "HS256"
 SECRET_KEY = "e97965045c7df14cb4d5760371e7325104a8f33ad5d00c0a506d6fb09d0047db"
 router = APIRouter()
@@ -98,13 +101,24 @@ async def delete_one_appointment(id: str):
      apmt_conn.delete_one(id)
      apmt_conn.close_connection()
      return Response(status_code=HTTP_204_NO_CONTENT)
+#Middleware para verificar, tiene que estar antes de la ruta que lo llama
+def verify_token_in_blacklist(token: str = Depends(auth_scheme)):
+    print("verificando", token)
+    if token in blacklisted_tokens:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 @router.get("/calendar/", status_code=HTTP_200_OK,tags=["Medical Appointments Calendar"])
-async def get_calendar(init: str, end: str, token: str = Depends(auth_scheme)):
+async def get_calendar(init: str, end: str,token: dict = Depends(verify_token_in_blacklist)):
+# async def get_calendar(init: str, end: str, token: str = Depends(auth_scheme)):
+     
      id = get_user_current(token)
      user_conn.__init__()
      data = apmt_conn.read_calendar(init, end, id)
      user_conn.close_connection()
      return data
 
- 
+
