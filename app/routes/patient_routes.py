@@ -83,6 +83,9 @@ async def get_one_patient(id: str):
 async def update_one_patient(user: PatientSchema, id:str):
     data=user.dict()
     data["id"] = id
+    data["password"] =""
+    data["specialty"] =""
+    data["user_type"] ="patient"
     user_conn.__init__()
     user_conn.update_one(data)
     user_conn.close_connection()

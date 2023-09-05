@@ -21,15 +21,18 @@ auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 app.title = "Medic Admin App"
 app.version ="1.1.0"
-
+origins = [
+    r"http://.%2A/.localhost/.com:.*",
+]
 # Configuración y middleware aquí
 app.add_middleware(
           CORSMiddleware,
-          allow_origins=["*"],
+          allow_origins=origins,
           allow_methods=["GET","POST","PUT","DELETE"],
-          allow_headers=["Authorization","Content-Type"],
+          allow_headers=["*"],
           allow_credentials=True
 )
+          # allow_headers=["Authorization","Content-Type"],
 @app.get('/', status_code=HTTP_200_OK,tags=["Root"])
 async def root():
      return {'Root API AppMedicAdmin'}

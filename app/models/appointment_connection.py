@@ -40,9 +40,61 @@ class AppointmentConnection:
 
     def read_one(self, id):
         with self.conn.cursor() as cur:
-            cur.execute(""" 
-                            SELECT * FROM medical_appointment WHERE id = %s; 
-                            """, (id,))
+            cur.execute("""
+                        SELECT
+                        ma.start_datetime,
+                        ma.end_datetime,
+                        ma.diagnosis,
+                        ma.prescription,
+                        ma.state,
+                        ma.id_patient,
+                        p.first_name AS patient_first_name,
+                        p.last_name AS patient_last_name,
+                        ma.id_doctor,
+                        d.first_name AS doctor_first_name,
+                        d.last_name AS doctor_last_name
+                        FROM medical_appointment ma
+                        JOIN users p ON ma.id_patient = p.id
+                        JOIN users d ON ma.id_doctor = d.id
+                        WHERE ma.id = %s
+                        """, ( id,))
+            # data = cur.fetchall()
+            data = cur.fetchone()
+            return data
+            # cur.execute(""" 
+            #                 SELECT * FROM medical_appointment WHERE id = %s; 
+            #                 """, (id,))
+    def check_repeat(self, id_doctor):
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                            SELECT
+                                ma.id AS appointment_id,
+                                ma.start_datetime,
+                                ma.end_datetime,
+                                ma.diagnosis,
+                                ma.prescription,
+                                ma.id_patient,
+                                ma.id_doctor,
+                                u.first_name AS doctor_first_name,
+                                u.last_name AS doctor_last_name
+                            FROM
+                                medical_appointment ma
+                            INNER JOIN
+                                users u ON ma.id_doctor = u.id
+                            WHERE
+                                ma.id_doctor = %s
+                                AND NOT EXISTS (
+                                    SELECT 1
+                                    FROM medical_appointment sub_ma
+                                    WHERE
+                                        sub_ma.id_doctor = ma.id_doctor
+                                        AND sub_ma.id != ma.id
+                                        AND (
+                                            (ma.start_datetime BETWEEN sub_ma.start_datetime AND sub_ma.end_datetime)
+                                            OR (ma.end_datetime BETWEEN sub_ma.start_datetime AND sub_ma.end_datetime)
+                                        )
+                                );
+                            """, (id_doctor,))
             data = cur.fetchone()
             return data
 

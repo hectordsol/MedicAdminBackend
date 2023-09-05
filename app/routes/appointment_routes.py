@@ -69,6 +69,9 @@ async def create_appointment(appointment: AppointmentSchema):
      data=appointment.dict()
      #print(data)
      apmt_conn.__init__()
+     print(data["id_doctor"])
+     ver = apmt_conn.check_repeat(data["id_doctor"])
+     print(ver)
      apmt_conn.write(data)
      apmt_conn.close_connection()
      return Response(status_code=HTTP_201_CREATED)
@@ -79,16 +82,20 @@ async def get_one_appointment(id: str):
      dictionary = {}
      apmt_conn.__init__()
      data = apmt_conn.read_one(id)
-     dictionary["id"] = data[0]
-     dictionary["start_datetime"] = data[1]
-     dictionary["end_datetime"] = data[2]
-     dictionary["diagnosis"] = data[3]
-     dictionary["prescription"] = data[4]
+     # dictionary["id"] = data[0]
+     dictionary["start_datetime"] = data[0]
+     dictionary["end_datetime"] = data[1]
+     dictionary["diagnosis"] = data[2]
+     dictionary["prescription"] = data[3]
+     dictionary["state"] = data[4]
      dictionary["id_patient"] = data[5]
-     dictionary["id_doctor"] = data[6]
-     dictionary["state"] = data[7]
+     dictionary["patient_first_name"] = data[6]
+     dictionary["patient_last_name"] = data[7]
+     dictionary["id_doctor"] = data[8]
+     dictionary["doctor_first_name"] = data[9]
+     dictionary["doctor_last_name"] = data[10]
      apmt_conn.close_connection()
-     return data
+     return dictionary
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Appointments"])
 async def update_one_appointment(appointment: AppointmentSchema, id:str):
@@ -107,7 +114,7 @@ async def delete_one_appointment(id: str):
      return Response(status_code=HTTP_204_NO_CONTENT)
 #Middleware para verificar, tiene que estar antes de la ruta que lo llama
 def verify_token_in_blacklist(token: str = Depends(auth_scheme)):
-    print("verificando", token)
+#     print("verificando", token)
     if token in blacklisted_tokens:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

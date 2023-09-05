@@ -65,7 +65,6 @@ class UserConnection:
             self.conn.commit()
     
     def update_one(self, data):
-        print(data)
         with self.conn.cursor() as cur:
             cur.execute(""" 
                         UPDATE "users" SET first_name = %(first_name)s, last_name = %(last_name)s, email = %(email)s,
