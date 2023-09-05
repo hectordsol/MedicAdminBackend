@@ -30,11 +30,21 @@ class UserConnection:
 
     def read_by_email(self, mail):
         with self.conn.cursor() as cur:
-            cur.execute(""" 
-                            SELECT * FROM users WHERE email = %s LIMIT 1; 
+            cur.execute("""
+                        SELECT 
+                            id,
+                            first_name,
+                            last_name,
+                            email,
+                            password
+                        FROM 
+                            users
+                        WHERE 
+                            email = %s LIMIT 1;
                             """, (mail,))
             data = cur.fetchone()
             return data
+                            # SELECT * FROM users WHERE email = %s LIMIT 1; 
 
     def write(self, data):
         with self.conn.cursor() as cur:

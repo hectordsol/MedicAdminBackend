@@ -56,18 +56,23 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
      user = auth_user(form_data.username, form_data.password)
      access_token_expires = timedelta(hours=2)
      access_token_jwt = create_token({"id":user[0],"sub": user[1]+" "+user[2]}, access_token_expires)
-     return {"access_token":access_token_jwt,"token_type":"bearer"}
+     objeto = {}
+     objeto["id"] = user[0]
+     objeto["first_name"] = user[1]
+     objeto["last_name"] = user[2]
+     objeto["email"] = user[3]
+     return {"user":objeto,"access_token":access_token_jwt,"token_type":"bearer"}
 
 # funcion de autenticación que llama a verificar si existe usuario y si la contraseña es correcta
 def auth_user(email, password):
      user = get_by_email_user(email)
      if not user:
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate user", 
-                headers={"WWW-Authenticate":"Bearer"}) 
-     hashedPassword=user[10]
+                headers={"WWW-Authenticate":"Bearer"})
+     hashedPassword=user[4]
      if not verify_pass(password,hashedPassword):
           raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate pass", 
-                headers={"WWW-Authenticate":"Bearer"}) 
+                headers={"WWW-Authenticate":"Bearer"})
      return user
 
 #Verifica la contraseña hasheada de la base de datos con la ingresada

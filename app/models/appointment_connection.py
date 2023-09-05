@@ -15,7 +15,25 @@ class AppointmentConnection:
     def read_all(self):
         with self.conn.cursor() as cur:
             cur.execute(""" 
-                        SELECT * FROM medical_appointment;
+                        SELECT 
+                            ma.id AS appointment_id,
+                            ma.start_datetime,
+                            ma.end_datetime,
+                            ma.diagnosis,
+                            ma.prescription,
+                            ma.id_patient,
+                            ma.id_doctor,
+                            up.first_name AS patient_first_name,
+                            up.last_name AS patient_last_name,
+                            ud.first_name AS doctor_first_name,
+                            ud.last_name AS doctor_last_name,
+                            ma.state
+                        FROM 
+                            medical_appointment ma
+                        LEFT JOIN
+                            users up ON ma.id_patient = up.id
+                        LEFT JOIN
+                            users ud ON ma.id_doctor = ud.id;  
                         """)
             data =cur.fetchall()
             return data

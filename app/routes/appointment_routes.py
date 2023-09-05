@@ -55,7 +55,11 @@ async def get_appointments():
           dictionary["prescription"] = data[4]
           dictionary["id_patient"] = data[5]
           dictionary["id_doctor"] = data[6]
-          dictionary["state"] = data[7]
+          dictionary["patient_first_name"] = data[7]
+          dictionary["patient_last_name"] = data[8]
+          dictionary["doctor_first_name"] = data[9]
+          dictionary["doctor_last_name"] = data[10]
+          dictionary["state"] = data[11]
           items.append(dictionary)
      apmt_conn.close_connection()
      return items
