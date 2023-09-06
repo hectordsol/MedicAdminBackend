@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, Depends,HTTPException, status
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
-
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from bson import ObjectId
 from app.models.appointment_connection import AppointmentConnection
 from app.models.user_connection import UserConnection
 from app.schemas.appointment_schema import AppointmentSchema
@@ -21,6 +21,13 @@ apmt_conn.close_connection("apmt_appintment_routes")
 
 auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 # auth_scheme = OAuth2PasswordBearer("/login")
+
+async def is_valid_id(id):
+    try:
+        ObjectId(id)
+        return True
+    except:
+        return False
 
 def get_user_current(token: str = Depends(auth_scheme)):
      try:
@@ -79,6 +86,8 @@ async def create_appointment(appointment: AppointmentSchema):
 
 @router.get("/{id}", status_code=HTTP_200_OK,tags=["Appointments"])
 async def get_one_appointment(id: str):
+     if not await is_valid_id(id):
+        raise HTTPException(HTTP_400_BAD_REQUEST, "Invalid id format")
      dictionary = {}
      apmt_conn.__init__()
      data = apmt_conn.read_one(id)
@@ -122,14 +131,29 @@ def verify_token_in_blacklist(token: str = Depends(auth_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@router.get("/calendar/", status_code=HTTP_200_OK,tags=["Medical Appointments Calendar"])
-async def get_calendar(init: str, end: str,token: dict = Depends(verify_token_in_blacklist)):
-# async def get_calendar(init: str, end: str, token: str = Depends(auth_scheme)):
-     
-     id = get_user_current(token)
+@router.get("/calendar/{id_doctor}", status_code=HTTP_200_OK,tags=["Medical Appointments Calendar"])
+# async def get_calendar(init: str, end: str,token: dict = Depends(verify_token_in_blacklist)):
+async def get_calendar(id_doctor:str, init: str, end: str):
+
+     # id = get_user_current(token)
      user_conn.__init__()
-     data = apmt_conn.read_calendar(init, end, id)
+     user = user_conn.read_one(id_doctor)
      user_conn.close_connection()
-     return data
+     if not user:
+          raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Doctor not found")
+     apmt_conn.__init__()
+     items = []
+     for data in apmt_conn.read_calendar(id_doctor,init, end ):
+          json = {}
+          json["id_appointment"] = data[0]
+          json["start_datetime"] = data[1]
+          json["end_datetime"] = data[2]
+          json["status"] = data[3]
+          json["id_patient"] = data[4]
+          json["fist_name"] = data[5]
+          json["last_name"] = data[6]
+          items.append(json)
+     apmt_conn.close_connection()
+     return items
 
 

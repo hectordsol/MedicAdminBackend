@@ -125,8 +125,8 @@ class AppointmentConnection:
                         """, data)
             self.conn.commit()
 
-    def read_calendar(self, init:str, end:str, id:str):
-        print(id, init, end)
+    def read_calendar(self, id:str, init:str, end:str):
+        # print(id, init, end)
         with self.conn.cursor() as cur:
             cur.execute("""
                         SELECT ma.id AS appointment_id,
@@ -138,9 +138,10 @@ class AppointmentConnection:
                         p.last_name AS patient_last_name
                         FROM medical_appointment ma
                         JOIN users p ON ma.id_patient = p.id
-                        WHERE ma.start_datetime >= %s
+                        WHERE ma.id_doctor = %s
+                        AND ma.start_datetime >= %s
                         AND ma.start_datetime <= %s
-                        """, ( init, end,))
+                        """, (id, init, end,))
             data = cur.fetchall()
             print(data)
             return data

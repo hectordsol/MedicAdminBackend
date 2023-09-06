@@ -25,7 +25,8 @@ def verify_token_in_blacklist(token: str = Depends(auth_scheme)):
         )
 
 @router.get('/', status_code=HTTP_200_OK,tags=["Patients"])
-async def get_patients(token: dict = Depends(verify_token_in_blacklist)):
+async def get_patients():
+# async def get_patients(token: dict = Depends(verify_token_in_blacklist)):
      items=[]
      user_conn.__init__()
      for data in user_conn.read_all("patient"):
