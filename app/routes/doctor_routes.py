@@ -68,7 +68,7 @@ async def get_one_doctor(id: str):
      dictionary["specialty"] = data[11]
      dictionary["user_type"] = data[13]
      user_conn.close_connection()
-     return data
+     return dictionary
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Doctors"])
 async def update_one_doctor(user: DoctorSchema, id:str):
