@@ -54,7 +54,6 @@ app.include_router(appointment_routes.router, prefix="/appointments", tags=["App
 #         )
 
 @app.post('/login', status_code=HTTP_200_OK,tags=["Login"])
-# async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
      user = auth_user(form_data.username, form_data.password)
      access_token_expires = timedelta(hours=2)
