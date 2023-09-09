@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, Depends,HTTPException, status
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-from bson import ObjectId
+import uuid
 from app.models.appointment_connection import AppointmentConnection
 from app.models.user_connection import UserConnection
 from app.schemas.appointment_schema import AppointmentSchema
@@ -24,9 +24,9 @@ auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 async def is_valid_id(id):
     try:
-        ObjectId(id)
-        return True
-    except:
+        val = uuid.UUID(id,version=4)
+        return str(val) == id
+    except ValueError:
         return False
 
 def get_user_current(token: str = Depends(auth_scheme)):

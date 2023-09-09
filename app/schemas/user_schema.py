@@ -6,7 +6,7 @@ import uuid
 blacklisted_tokens = set()
 
 class UserSchema(BaseModel):
-    id:Optional[uuid.UUID]
+    id:Optional[str]
     first_name: str
     last_name: str
     email:str
