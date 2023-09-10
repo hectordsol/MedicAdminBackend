@@ -10,5 +10,7 @@ class AppointmentSchema(BaseModel):
     diagnosis: Optional[str]
     prescription: Optional[str]
     id_patient: str
+    patient_first_name: Optional[str]
+    patient_last_name: Optional[str]
     id_doctor: str
     state: str

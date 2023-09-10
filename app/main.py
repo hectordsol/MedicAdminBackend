@@ -32,7 +32,7 @@ app.add_middleware(
           allow_headers=["*"],
           allow_credentials=True
 )
-          # allow_headers=["Authorization","Content-Type"],
+# allow_headers=["Authorization","Content-Type"],
 @app.get('/', status_code=HTTP_200_OK,tags=["Root"])
 async def root():
      return {'Root API AppMedicAdmin'}

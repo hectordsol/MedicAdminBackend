@@ -50,10 +50,10 @@ class UserConnection:
         with self.conn.cursor() as cur:
             cur.execute("""
                         INSERT INTO "users"(id, first_name, last_name, email, address, city, country, 
-                        phone, date_of_birth, gender, password, specialty, health_insurance, user_type) 
+                        phone, date_of_birth, gender, password, specialty, health_insurance, user_type, dni) 
                         VALUES(uuid_generate_v4(), %(first_name)s, %(last_name)s, %(email)s, %(address)s,
                         %(city)s, %(country)s, %(phone)s, %(date_of_birth)s, %(gender)s, %(password)s,
-                        %(specialty)s, %(health_insurance)s, %(user_type)s)
+                        %(specialty)s, %(health_insurance)s, %(user_type)s, %(dni)s)
                         """,data)
             self.conn.commit()
 
@@ -70,7 +70,7 @@ class UserConnection:
                         UPDATE "users" SET first_name = %(first_name)s, last_name = %(last_name)s, email = %(email)s,
                         address = %(address)s, city = %(city)s, country = %(country)s, phone = %(phone)s, date_of_birth = %(date_of_birth)s, 
                         gender = %(gender)s, password = %(password)s, specialty = %(specialty)s, health_insurance = %(health_insurance)s,
-                        user_type = %(user_type)s
+                        user_type = %(user_type)s, dni = %(dni)s
                         WHERE id = %(id)s; 
                         """, data)
             self.conn.commit()

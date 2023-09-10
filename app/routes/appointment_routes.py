@@ -74,6 +74,7 @@ async def get_appointments():
 @router.post("/", status_code=HTTP_201_CREATED,tags=["Appointments"])
 async def create_appointment(appointment: AppointmentSchema):
      data=appointment.dict()
+     data["state"]="reserved"
      print(data)
      apmt_conn.__init__()
      # print(data["id_doctor"])

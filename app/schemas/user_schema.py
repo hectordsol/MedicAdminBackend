@@ -9,13 +9,14 @@ class UserSchema(BaseModel):
     id:Optional[str]
     first_name: str
     last_name: str
-    email:str
+    email:Optional[str]
     address:Optional[str]
     city:Optional[str]
     country:Optional[str]
     phone:Optional[str]
-    date_of_birth: date
-    gender: str
+    date_of_birth: Optional[date]
+    gender: Optional[str]
+    dni: Optional[str]
     # user_type: str
 
 class AdminSchema(UserSchema):

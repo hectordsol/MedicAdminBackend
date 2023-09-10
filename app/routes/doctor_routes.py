@@ -31,6 +31,7 @@ async def get_doctors():
           dictionary["password"] = data[10]
           dictionary["specialty"] = data[11]
           dictionary["user_type"] = data[13]
+          dictionary["dni"] = data[14]
           items.append(dictionary)
      user_conn.close_connection()
      return items
@@ -67,6 +68,7 @@ async def get_one_doctor(id: str):
      dictionary["password"] = data[10]
      dictionary["specialty"] = data[11]
      dictionary["user_type"] = data[13]
+     dictionary["dni"] = data[14]
      user_conn.close_connection()
      return dictionary
 

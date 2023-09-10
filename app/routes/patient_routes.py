@@ -43,6 +43,7 @@ async def get_patients():
           dictionary["gender"] = data[9]
           dictionary["health_insurance"] = data[12]
           dictionary["user_type"] = data[13]
+          dictionary["dni"] = data[14]
           items.append(dictionary)
      user_conn.close_connection()
      return items
@@ -78,6 +79,7 @@ async def get_one_patient(id: str):
      dictionary["gender"] = data[9]
      dictionary["health_insurance"] = data[12]
      dictionary["user_type"] = data[13]
+     dictionary["dni"] = data[14]
      return data
 
 @router.put("/{id}", status_code=HTTP_204_NO_CONTENT,tags=["Patients"])

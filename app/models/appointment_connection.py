@@ -23,15 +23,13 @@ class AppointmentConnection:
                             ma.prescription,
                             ma.id_patient,
                             ma.id_doctor,
-                            up.first_name AS patient_first_name,
-                            up.last_name AS patient_last_name,
+                            ma.patient_first_name,
+                            ma.patient_last_name,
                             ud.first_name AS doctor_first_name,
                             ud.last_name AS doctor_last_name,
                             ma.state
                         FROM 
                             medical_appointment ma
-                        LEFT JOIN
-                            users up ON ma.id_patient = up.id
                         LEFT JOIN
                             users ud ON ma.id_doctor = ud.id;  
                         """)
@@ -102,9 +100,10 @@ class AppointmentConnection:
         with self.conn.cursor() as cur:
             cur.execute("""
                         INSERT INTO "medical_appointment"(id, start_datetime, end_datetime, diagnosis,
-                        prescription, id_patient, id_doctor, state)
+                        prescription, id_patient, patient_first_name, patient_last_name, id_doctor, state)
                         VALUES(uuid_generate_v4(), %(start_datetime)s, %(end_datetime)s, %(diagnosis)s,
-                        %(prescription)s, %(id_patient)s, %(id_doctor)s, %(state)s)
+                        %(prescription)s, %(id_patient)s, %(patient_first_name)s, %(patient_last_name)s,
+                        %(id_doctor)s, %(state)s)
                         """,data)
             self.conn.commit()
 
@@ -119,8 +118,8 @@ class AppointmentConnection:
         with self.conn.cursor() as cur:
             cur.execute("""
                         UPDATE "medical_appointment" SET start_datetime = %(start_datetime)s, end_datetime = %(end_datetime)s, 
-                        diagnosis = %(diagnosis)s, prescription = %(prescription)s, id_patient = %(id_patient)s, 
-                        id_doctor = %(id_doctor)s, state = %(state)s
+                        diagnosis = %(diagnosis)s, prescription = %(prescription)s, patient_first_name = %(patient_first_name)s,
+                        patient_last_name = %(patient_last_name)s, id_patient = %(id_patient)s, id_doctor = %(id_doctor)s, state = %(state)s
                         WHERE id = %(id)s; 
                         """, data)
             self.conn.commit()

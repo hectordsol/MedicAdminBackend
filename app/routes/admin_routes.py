@@ -29,6 +29,7 @@ async def get_admins():
           dictionary["gender"] = data[9]
           dictionary["password"] = data[10]
           dictionary["user_type"] = data[13]
+          dictionary["dni"] = data[14]
           items.append(dictionary)
      user_conn.close_connection("admin_routes_read_all")
      return items
@@ -66,6 +67,7 @@ async def get_one_admin(id: str):
      dictionary["gender"] = data[9]
      dictionary["password"] = data[10]
      dictionary["user_type"] = data[13]
+     dictionary["dni"] = data[14]
      user_conn.close_connection("admin_routes_get_one_id")
      return data
 
@@ -73,6 +75,9 @@ async def get_one_admin(id: str):
 async def update_one_admin(user: AdminSchema, id:str):
     data=user.dict()
     data["id"] = id
+    data["specialty"] = ""
+    data["health_insurance"] =""
+    data["user_type"] ="admin"
     # Hash de la contraseña antes de guardarla
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt())
     data["password"] = hashed_password.decode('utf-8')
